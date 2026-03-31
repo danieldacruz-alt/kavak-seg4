@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kavak · Controle SEG4</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f0ede8;
+  --bg2: #e8e4de;
+  --surface: #ffffff;
+  --border: #d8d3cc;
+  --border2: #c8c2b8;
+  --text: #1a1714;
+  --muted: #8a8278;
+  --kavak: #ff4d00;
+  --kavak2: #cc3d00;
+  --success: #1a6b3c;
+  --success-bg: #e8f5ed;
+  --warning: #8a5a00;
+  --warning-bg: #fef3e2;
+  --danger: #8a1a1a;
+  --danger-bg: #fde8e8;
+  --info: #1a3a6b;
+  --info-bg: #e8eef5;
+  --guincho: #5c2d91;
+  --guincho-bg: #f0e8f5;
+  --shadow: 0 2px 8px rgba(26,23,20,0.08);
+  --shadow-lg: 0 8px 32px rgba(26,23,20,0.12);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+}
+
+/* ── LAYOUT ── */
+.app { display: flex; min-height: 100vh; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 220px;
+  background: var(--text);
+  color: #fff;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-logo .k {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  color: var(--kavak);
+  line-height: 1;
+}
+
+.sidebar-logo p {
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-top: 2px;
+}
+
+.sidebar nav { padding: 16px 0; flex: 1; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.55);
+  cursor: pointer;
+  transition: all 0.15s;
+  border-left: 3px solid transparent;
+}
+
+.nav-item:hover { color: #fff; background: rgba(255,255,255,0.06); }
+.nav-item.active { color: #fff; border-left-color: var(--kavak); background: rgba(255,77,0,0.12); }
+.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+.sidebar-month {
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-month label { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px; }
+
+.sidebar-month select {
+  width: 100%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  outline: none;
+}
+
+/* MAIN */
+.main { flex: 1; overflow-y: auto; }
+
+.page { display: none; padding: 32px; }
+.page.active { display: block; }
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.page-header h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+.page-header p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+/* CARDS */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.card {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.card-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.card-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  line-height: 1;
+  color: var(--text);
+}
+
+.card-value.orange { color: var(--kavak); }
+.card-value.green { color: var(--success); }
+.card-value.red { color: var(--danger); }
+.card-value.purple { color: var(--guincho); }
+
+.card-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+/* TABLES */
+.table-wrap {
+  background: var(--surface);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.table-header h3 { font-size: 14px; font-weight: 700; }
+
+.table-scroll { overflow-x: auto; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+th {
+  background: var(--bg);
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+
+td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--bg); }
+
+/* BADGES */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-log-ext { background: #fff3e0; color: #e65100; }
+.badge-guincho { background: var(--guincho-bg); color: var(--guincho); }
+.badge-ftp { background: var(--info-bg); color: var(--info); }
+.badge-hub { background: var(--success-bg); color: var(--success); }
+.badge-lider { background: #e8e0f5; color: #4a2080; }
+
+.badge-falta { background: var(--danger-bg); color: var(--danger); }
+.badge-folga { background: var(--info-bg); color: var(--info); }
+.badge-atestado { background: var(--warning-bg); color: var(--warning); }
+.badge-ferias { background: #e0f5e0; color: #1a5a1a; }
+.badge-freelancer { background: #f5e0ff; color: #6a0080; }
+
+/* BUTTONS */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary { background: var(--kavak); color: #fff; }
+.btn-primary:hover { background: var(--kavak2); }
+.btn-outline { background: transparent; border: 1.5px solid var(--border2); color: var(--text); }
+.btn-outline:hover { border-color: var(--kavak); color: var(--kavak); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid #f5c0c0; }
+.btn-danger:hover { background: #f5c0c0; }
+
+/* FORMS */
+.form-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.form-group input:focus,
+.form-group select:focus { border-color: var(--kavak); }
+
+/* MODAL */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26,23,20,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  display: none;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 28px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: var(--shadow-lg);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal h2 { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+
+.modal-footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+/* SETOR SECTION */
+.setor-section {
+  margin-bottom: 28px;
+}
+
+.setor-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.setor-title h3 { font-size: 15px; font-weight: 700; }
+
+/* CALENDÁRIO DE OCORRÊNCIAS */
+.ocorrencias-list { display: flex; flex-direction: column; gap: 8px; }
+
+.ocorrencia-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.ocorrencia-item .oc-data { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); min-width: 80px; }
+.ocorrencia-item .oc-nome { flex: 1; font-weight: 500; }
+.ocorrencia-item .oc-obs { font-size: 12px; color: var(--muted); flex: 1; }
+
+/* RESUMO FINANCEIRO */
+.fin-table { width: 100%; }
+.fin-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.fin-row:last-child { border: none; }
+.fin-row.total {
+  font-weight: 700;
+  font-size: 16px;
+  padding-top: 16px;
+}
+.fin-row.total .fin-val { color: var(--kavak); font-family: 'Bebas Neue', sans-serif; font-size: 22px; }
+.fin-val { font-family: 'DM Mono', monospace; font-weight: 600; }
+.fin-val.neg { color: var(--danger); }
+.fin-val.pos { color: var(--success); }
+.fin-val.add { color: var(--guincho); }
+
+/* PROGRESS BAR */
+.progress-wrap { margin-top: 8px; }
+.progress-bar-bg { height: 6px; background: var(--bg2); border-radius: 3px; overflow: hidden; }
+.progress-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; background: var(--kavak); }
+.progress-bar-fill.green { background: var(--success); }
+.progress-bar-fill.red { background: #c0392b; }
+
+/* SETOR CARDS */
+.setor-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px; }
+
+.setor-card {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.setor-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.setor-card-header h4 { font-size: 13px; font-weight: 700; }
+.setor-card-stat { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--kavak); }
+
+/* ALERT */
+.alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.alert-info { background: var(--info-bg); color: var(--info); border: 1px solid #b0c8e8; }
+.alert-warning { background: var(--warning-bg); color: var(--warning); border: 1px solid #f0d080; }
+
+/* EMPTY STATE */
+.empty { text-align: center; padding: 48px 20px; color: var(--muted); }
+.empty svg { width: 48px; height: 48px; stroke: var(--border2); margin-bottom: 12px; }
+.empty p { font-size: 14px; }
+
+/* TOOLTIP */
+.tooltip-val { cursor: help; border-bottom: 1px dashed var(--muted); }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .sidebar { width: 60px; }
+  .sidebar-logo p, .nav-item span, .sidebar-month { display: none; }
+  .sidebar-logo .k { font-size: 24px; }
+  .nav-item { padding: 14px; justify-content: center; }
+  .page { padding: 20px 16px; }
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.page.active { animation: fadeIn 0.2s ease; }
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="k">KAVAK</div>
+    <p>Controle SEG4</p>
+  </div>
+  <nav>
+    <div class="nav-item active" onclick="showPage('dashboard')" data-page="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <span>Dashboard</span>
+    </div>
+    <div class="nav-item" onclick="showPage('ocorrencias')" data-page="ocorrencias">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+      <span>Ocorrências</span>
+    </div>
+    <div class="nav-item" onclick="showPage('motoristas')" data-page="motoristas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      <span>Motoristas</span>
+    </div>
+    <div class="nav-item" onclick="showPage('financeiro')" data-page="financeiro">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      <span>Financeiro</span>
+    </div>
+    <div class="nav-item" onclick="showPage('freelancers')" data-page="freelancers">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>Freelancers</span>
+    </div>
+  </nav>
+  <div class="sidebar-month">
+    <label>Mês de referência</label>
+    <select id="mesRef" onchange="onMesChange()"></select>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div>
+        <h1>Dashboard</h1>
+        <p id="dash-mes-label">Visão geral do mês</p>
+      </div>
+      <button class="btn btn-primary" onclick="openModalOcorrencia()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nova Ocorrência
+      </button>
+    </div>
+
+    <div class="cards-grid" id="dash-cards"></div>
+
+    <div class="setor-cards" id="dash-setor-cards"></div>
+
+    <div class="table-wrap">
+      <div class="table-header">
+        <h3>Ocorrências recentes</h3>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr>
+            <th>Data</th><th>Motorista</th><th>Setor</th><th>Tipo</th><th>Obs</th><th></th>
+          </tr></thead>
+          <tbody id="dash-ocorrencias-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ OCORRÊNCIAS ═══ -->
+  <div class="page" id="page-ocorrencias">
+    <div class="page-header">
+      <div>
+        <h1>Ocorrências</h1>
+        <p>Registro diário de faltas, folgas, atestados e férias</p>
+      </div>
+      <button class="btn btn-primary" onclick="openModalOcorrencia()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Lançar Ocorrência
+      </button>
+    </div>
+
+    <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center;">
+      <select id="oc-filtro-setor" onchange="renderOcorrencias()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--surface);color:var(--text);outline:none;">
+        <option value="">Todos os setores</option>
+        <option value="LOG EXTERNA">LOG EXTERNA</option>
+        <option value="LOG EXTERNA - GUINCHO">LOG EXTERNA - GUINCHO</option>
+        <option value="FTP">FTP</option>
+        <option value="HUB OPS">HUB OPS</option>
+      </select>
+      <select id="oc-filtro-tipo" onchange="renderOcorrencias()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--surface);color:var(--text);outline:none;">
+        <option value="">Todos os tipos</option>
+        <option value="falta">Falta</option>
+        <option value="folga">Folga</option>
+        <option value="atestado">Atestado</option>
+        <option value="ferias">Férias</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table>
+          <thead><tr>
+            <th>Data</th><th>Motorista</th><th>Setor</th><th>Tipo</th><th>Desconto</th><th>Obs</th><th></th>
+          </tr></thead>
+          <tbody id="oc-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MOTORISTAS ═══ -->
+  <div class="page" id="page-motoristas">
+    <div class="page-header">
+      <div>
+        <h1>Motoristas</h1>
+        <p>Cadastro dos 23 profissionais SEG4</p>
+      </div>
+      <button class="btn btn-primary" onclick="openModalMotorista()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Adicionar Motorista
+      </button>
+    </div>
+    <div id="motoristas-setores"></div>
+  </div>
+
+  <!-- ═══ FINANCEIRO ═══ -->
+  <div class="page" id="page-financeiro">
+    <div class="page-header">
+      <div>
+        <h1>Financeiro</h1>
+        <p id="fin-mes-label">Fechamento do mês</p>
+      </div>
+      <button class="btn btn-outline" onclick="exportarResumo()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Exportar Resumo
+      </button>
+    </div>
+
+    <div class="cards-grid" id="fin-cards"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;flex-wrap:wrap;" id="fin-grid">
+
+      <div class="table-wrap">
+        <div class="table-header"><h3>Resumo por Setor</h3></div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Setor</th><th>Motoristas</th><th>Faltas</th><th>Desconto</th><th>Custo Líquido</th></tr></thead>
+            <tbody id="fin-setor-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-header"><h3>Composição do Pagamento</h3></div>
+        <div style="padding:20px;">
+          <div id="fin-composicao"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-header"><h3>Detalhamento por Motorista</h3></div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr>
+            <th>Motorista</th><th>Setor</th><th>Tipo</th><th>Salário Mensal</th><th>Faltas</th><th>Desconto Faltas</th><th>Freelancer (extra)</th><th>Total a Pagar</th>
+          </tr></thead>
+          <tbody id="fin-detalhe-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ FREELANCERS ═══ -->
+  <div class="page" id="page-freelancers">
+    <div class="page-header">
+      <div>
+        <h1>Freelancers</h1>
+        <p>Motoristas adicionais contratados no mês</p>
+      </div>
+      <button class="btn btn-primary" onclick="openModalFreelancer()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Registrar Freelancer
+      </button>
+    </div>
+
+    <div class="alert alert-info">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div><strong>Regra:</strong> Freelancer cobrindo falta = sem custo. Freelancer adicional ao time = R$ 273,13/dia.</div>
+    </div>
+
+    <div class="cards-grid" id="free-cards"></div>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table>
+          <thead><tr>
+            <th>Data</th><th>Nome</th><th>Setor</th><th>Tipo</th><th>Custo</th><th>Obs</th><th></th>
+          </tr></thead>
+          <tbody id="free-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<!-- ═══ MODAL OCORRÊNCIA ═══ -->
+<div class="modal-overlay" id="modal-ocorrencia">
+  <div class="modal">
+    <h2>Lançar Ocorrência</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Data</label>
+        <input type="date" id="oc-data">
+      </div>
+      <div class="form-group">
+        <label>Motorista</label>
+        <select id="oc-motorista"></select>
+      </div>
+      <div class="form-group">
+        <label>Tipo de Ocorrência</label>
+        <select id="oc-tipo">
+          <option value="falta">Falta</option>
+          <option value="folga">Folga</option>
+          <option value="atestado">Atestado</option>
+          <option value="ferias">Férias</option>
+        </select>
+      </div>
+      <div class="form-group" style="grid-column:1/-1;">
+        <label>Observação (opcional)</label>
+        <input type="text" id="oc-obs" placeholder="Ex: Falta justificada, atestado médico...">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-ocorrencia')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarOcorrencia()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL MOTORISTA ═══ -->
+<div class="modal-overlay" id="modal-motorista">
+  <div class="modal">
+    <h2 id="modal-motorista-title">Adicionar Motorista</h2>
+    <div class="form-grid">
+      <div class="form-group" style="grid-column:1/-1;">
+        <label>Nome Completo</label>
+        <input type="text" id="mot-nome" placeholder="Nome do motorista">
+      </div>
+      <div class="form-group">
+        <label>Tipo</label>
+        <select id="mot-tipo" onchange="updateSalario()">
+          <option value="Driver Interno">Driver Interno — R$ 5.725,26</option>
+          <option value="Driver Externo">Driver Externo — R$ 6.357,24</option>
+          <option value="Driver Interno (Insalubre)">Driver Interno Insalubre — R$ 7.119,57</option>
+          <option value="Driver Externo (Insalubre)">Driver Externo Insalubre — R$ 7.944,36</option>
+          <option value="Driver Guincho">Driver Guincho — R$ 8.218,25</option>
+          <option value="Líder">Líder — R$ 7.645,21</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Setor</label>
+        <select id="mot-setor">
+          <option value="LOG EXTERNA">LOG EXTERNA</option>
+          <option value="LOG EXTERNA - GUINCHO">LOG EXTERNA - GUINCHO</option>
+          <option value="FTP">FTP</option>
+          <option value="HUB OPS">HUB OPS</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Escala</label>
+        <select id="mot-escala">
+          <option value="seg-sex">Seg → Sex (5x2)</option>
+          <option value="6x1">6x1 (Seg → Sáb)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Salário Mensal (R$)</label>
+        <input type="number" id="mot-salario" step="0.01">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-motorista')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarMotorista()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL FREELANCER ═══ -->
+<div class="modal-overlay" id="modal-freelancer">
+  <div class="modal">
+    <h2>Registrar Freelancer</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Data</label>
+        <input type="date" id="fr-data">
+      </div>
+      <div class="form-group">
+        <label>Nome do Freelancer</label>
+        <input type="text" id="fr-nome" placeholder="Nome">
+      </div>
+      <div class="form-group">
+        <label>Setor</label>
+        <select id="fr-setor">
+          <option value="LOG EXTERNA">LOG EXTERNA</option>
+          <option value="LOG EXTERNA - GUINCHO">LOG EXTERNA - GUINCHO</option>
+          <option value="FTP">FTP</option>
+          <option value="HUB OPS">HUB OPS</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Tipo</label>
+        <select id="fr-tipo" onchange="updateFreelancerCusto()">
+          <option value="cobertura">Cobertura de Falta (sem custo)</option>
+          <option value="adicional">Motorista Adicional (R$ 273,13/dia)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Custo (R$)</label>
+        <input type="number" id="fr-custo" value="0" step="0.01" readonly>
+      </div>
+      <div class="form-group" style="grid-column:1/-1;">
+        <label>Observação</label>
+        <input type="text" id="fr-obs" placeholder="Motivo, referência...">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-freelancer')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarFreelancer()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DADOS & CONFIGURAÇÃO
+// ═══════════════════════════════════════════════════════
+
+const SALARIOS = {
+  'Driver Interno': 5725.26,
+  'Driver Externo': 6357.24,
+  'Driver Interno (Insalubre)': 7119.57,
+  'Driver Externo (Insalubre)': 7944.36,
+  'Driver Guincho': 8218.25,
+  'Líder': 7645.21
+};
+
+const DIAS_UTEIS_MES = { 'seg-sex': 22, '6x1': 26 }; // base aproximada
+const VALOR_FREELANCER_ADICIONAL = 273.13;
+const CONTRATO_TOTAL = 148650.47;
+
+// Motoristas pré-cadastrados com base no print
+let motoristas = [
+  { id:1, nome:'ANTONIO EVALDO SANTOS DE SOUSA', tipo:'Driver Guincho', setor:'LOG EXTERNA - GUINCHO', escala:'seg-sex', salario:8218.25 },
+  { id:2, nome:'RAPHAEL PINHEIRO SOUTO DE ALMEIDA', tipo:'Driver Guincho', setor:'LOG EXTERNA - GUINCHO', escala:'seg-sex', salario:8218.25 },
+  { id:3, nome:'GUSTAVO FERNANDES MORAES', tipo:'Driver Externo', setor:'LOG EXTERNA', escala:'seg-sex', salario:6357.24 },
+  { id:4, nome:'ROGERIO DE JESUS OLIVEIRA', tipo:'Driver Externo', setor:'LOG EXTERNA', escala:'seg-sex', salario:6357.24 },
+  { id:5, nome:'RONE MARQUES DA SILVA', tipo:'Driver Externo', setor:'LOG EXTERNA', escala:'seg-sex', salario:6357.24 },
+  { id:6, nome:'DOUGLAS RODRIGUES DE MELO', tipo:'Driver Externo', setor:'LOG EXTERNA', escala:'seg-sex', salario:6357.24 },
+  { id:7, nome:'EMERSON DA COSTA PARRA', tipo:'Driver Externo', setor:'LOG EXTERNA', escala:'seg-sex', salario:6357.24 },
+  { id:8, nome:'RAQUEL DOS SANTOS AVELINO', tipo:'Driver Externo', setor:'LOG EXTERNA', escala:'seg-sex', salario:6357.24 },
+  { id:9, nome:'JOSE VICTOR DE SOUZA', tipo:'Driver Externo', setor:'LOG EXTERNA', escala:'seg-sex', salario:6357.24 },
+  { id:10, nome:'SERGIO AVELINO MACHADO', tipo:'Líder', setor:'FTP', escala:'6x1', salario:7645.21 },
+  { id:11, nome:'ELIEL VLADIMIR DOS SANTOS', tipo:'Driver Interno', setor:'FTP', escala:'6x1', salario:5725.26 },
+  { id:12, nome:'GABRIEL HENRIQUE GONCALVES', tipo:'Driver Interno', setor:'FTP', escala:'6x1', salario:5725.26 },
+  { id:13, nome:'MARCIEL PIA DA SILVA', tipo:'Driver Interno', setor:'FTP', escala:'6x1', salario:5725.26 },
+  { id:14, nome:'RAFAEL SANTOS DIAS', tipo:'Driver Interno', setor:'FTP', escala:'6x1', salario:5725.26 },
+  { id:15, nome:'WESLEY FERREIRA CARNEIRO DA SILVA', tipo:'Driver Interno (Insalubre)', setor:'FTP', escala:'6x1', salario:7119.57 },
+  { id:16, nome:'SANDER AMERICO BARROS', tipo:'Driver Interno (Insalubre)', setor:'HUB OPS', escala:'6x1', salario:7119.57 },
+  { id:17, nome:'EVERITON SANTOS NASCIMENTO', tipo:'Driver Interno', setor:'HUB OPS', escala:'6x1', salario:5725.26 },
+  { id:18, nome:'ADRIANO MARCOS SANTOS AURELIANO', tipo:'Driver Interno', setor:'HUB OPS', escala:'6x1', salario:5725.26 },
+  { id:19, nome:'REINALDO VICENTE DE ALCANTARA', tipo:'Driver Interno', setor:'HUB OPS', escala:'6x1', salario:5725.26 },
+  { id:20, nome:'GABRIEL BORGES SOUTO', tipo:'Driver Interno', setor:'HUB OPS', escala:'6x1', salario:5725.26 },
+  { id:21, nome:'MAURICIO SANTOS DAMASCENO', tipo:'Driver Externo (Insalubre)', setor:'HUB OPS', escala:'6x1', salario:7944.36 },
+  { id:22, nome:'MOTORISTA 22', tipo:'Driver Interno', setor:'HUB OPS', escala:'6x1', salario:5725.26 },
+  { id:23, nome:'MOTORISTA 23', tipo:'Driver Interno', setor:'FTP', escala:'6x1', salario:5725.26 }
+];
+
+let ocorrencias = [];
+let freelancers = [];
+let mesAtual = '';
+let nextMotId = 24;
+
+// ═══════════════════════════════════════════════════════
+// INICIALIZAÇÃO
+// ═══════════════════════════════════════════════════════
+
+function init() {
+  // Carrega dados do localStorage
+  const saved = localStorage.getItem('kavak_seg4');
+  if (saved) {
+    const d = JSON.parse(saved);
+    if (d.motoristas) motoristas = d.motoristas;
+    if (d.ocorrencias) ocorrencias = d.ocorrencias;
+    if (d.freelancers) freelancers = d.freelancers;
+    if (d.nextMotId) nextMotId = d.nextMotId;
+  }
+
+  // Popula seletor de mês
+  const sel = document.getElementById('mesRef');
+  const now = new Date();
+  for (let i = -2; i <= 3; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const label = d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    const opt = document.createElement('option');
+    opt.value = val; opt.textContent = label.charAt(0).toUpperCase() + label.slice(1);
+    if (i === 0) opt.selected = true;
+    sel.appendChild(opt);
+  }
+  mesAtual = sel.value;
+
+  // Data padrão nos modais
+  document.getElementById('oc-data').value = toDateInput(new Date());
+  document.getElementById('fr-data').value = toDateInput(new Date());
+
+  renderAll();
+}
+
+function save() {
+  localStorage.setItem('kavak_seg4', JSON.stringify({ motoristas, ocorrencias, freelancers, nextMotId }));
+}
+
+function toDateInput(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function formatDate(str) {
+  if (!str) return '—';
+  const [y,m,d] = str.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function formatMoney(v) {
+  return 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+
+function getMesLabel() {
+  const [y,m] = mesAtual.split('-');
+  const d = new Date(parseInt(y), parseInt(m)-1, 1);
+  const l = d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  return l.charAt(0).toUpperCase() + l.slice(1);
+}
+
+function onMesChange() {
+  mesAtual = document.getElementById('mesRef').value;
+  renderAll();
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVEGAÇÃO
+// ═══════════════════════════════════════════════════════
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelector(`[data-page="${name}"]`).classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
+
+function getOcMes() {
+  return ocorrencias.filter(o => o.data && o.data.startsWith(mesAtual));
+}
+
+function getFreMes() {
+  return freelancers.filter(f => f.data && f.data.startsWith(mesAtual));
+}
+
+function getDiasUteis(escala) {
+  const [y,m] = mesAtual.split('-').map(Number);
+  const dias = new Date(y, m, 0).getDate();
+  let uteis = 0;
+  for (let d = 1; d <= dias; d++) {
+    const dow = new Date(y, m-1, d).getDay();
+    if (escala === 'seg-sex' && dow >= 1 && dow <= 5) uteis++;
+    if (escala === '6x1' && dow >= 1 && dow <= 6) uteis++;
+  }
+  return uteis;
+}
+
+function getDescontoDiario(motorista) {
+  const dias = getDiasUteis(motorista.escala);
+  return motorista.salario / dias;
+}
+
+function getOcorMotoristasMes(motoristaId, tipos) {
+  return getOcMes().filter(o => o.motoristaId === motoristaId && tipos.includes(o.tipo));
+}
+
+function badgeSetor(setor) {
+  const map = {
+    'LOG EXTERNA': 'badge-log-ext',
+    'LOG EXTERNA - GUINCHO': 'badge-guincho',
+    'FTP': 'badge-ftp',
+    'HUB OPS': 'badge-hub',
+    'Líder': 'badge-lider'
+  };
+  return `<span class="badge ${map[setor] || 'badge-ftp'}">${setor}</span>`;
+}
+
+function badgeTipo(tipo) {
+  const map = {
+    falta: 'badge-falta',
+    folga: 'badge-folga',
+    atestado: 'badge-atestado',
+    ferias: 'badge-ferias',
+    freelancer: 'badge-freelancer'
+  };
+  const label = { falta:'Falta', folga:'Folga', atestado:'Atestado', ferias:'Férias', freelancer:'Freelancer' };
+  return `<span class="badge ${map[tipo] || ''}">${label[tipo] || tipo}</span>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER ALL
+// ═══════════════════════════════════════════════════════
+
+function renderAll() {
+  document.getElementById('dash-mes-label').textContent = getMesLabel();
+  document.getElementById('fin-mes-label').textContent = 'Fechamento — ' + getMesLabel();
+  renderDashboard();
+  renderOcorrencias();
+  renderMotoristas();
+  renderFinanceiro();
+  renderFreelancers();
+  populateMotoristaSelect();
+}
+
+// ═══════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════
+
+function renderDashboard() {
+  const ocMes = getOcMes();
+  const freMes = getFreMes();
+  const faltas = ocMes.filter(o => o.tipo === 'falta').length;
+  const atestados = ocMes.filter(o => o.tipo === 'atestado').length;
+  const ferias = ocMes.filter(o => o.tipo === 'ferias').length;
+  const frAdd = freMes.filter(f => f.tipo === 'adicional');
+  const custoFr = frAdd.reduce((s,f) => s + (f.custo||0), 0);
+
+  // Calcula desconto total
+  let descontoTotal = 0;
+  motoristas.forEach(m => {
+    const faltasMot = getOcorMotoristasMes(m.id, ['falta']).length;
+    descontoTotal += faltasMot * getDescontoDiario(m);
+  });
+
+  const custoFinal = CONTRATO_TOTAL - descontoTotal + custoFr;
+
+  document.getElementById('dash-cards').innerHTML = `
+    <div class="card">
+      <div class="card-label">Total Motoristas</div>
+      <div class="card-value">${motoristas.length}</div>
+      <div class="card-sub">23 posições contratadas</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Faltas no Mês</div>
+      <div class="card-value red">${faltas}</div>
+      <div class="card-sub">${atestados} atestado(s) · ${ferias} férias</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Desconto Calculado</div>
+      <div class="card-value orange">${formatMoney(descontoTotal)}</div>
+      <div class="card-sub">Baseado nas faltas lançadas</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Freelancer Adicional</div>
+      <div class="card-value purple">${formatMoney(custoFr)}</div>
+      <div class="card-sub">${frAdd.length} dia(s) adicional</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Previsão a Pagar SEG4</div>
+      <div class="card-value green">${formatMoney(custoFinal)}</div>
+      <div class="card-sub">Contrato base: ${formatMoney(CONTRATO_TOTAL)}</div>
+    </div>
+  `;
+
+  // Setor cards
+  const setores = ['LOG EXTERNA', 'LOG EXTERNA - GUINCHO', 'FTP', 'HUB OPS'];
+  let setorHtml = '';
+  setores.forEach(s => {
+    const mots = motoristas.filter(m => m.setor === s);
+    const faltasS = ocMes.filter(o => o.tipo === 'falta' && motoristas.find(m => m.id === o.motoristaId && m.setor === s)).length;
+    const pct = mots.length > 0 ? Math.round((faltasS / (mots.length * 22)) * 100) : 0;
+    const color = pct > 10 ? 'red' : pct > 5 ? '' : 'green';
+    setorHtml += `
+      <div class="setor-card">
+        <div class="setor-card-header">
+          <h4>${s}</h4>
+          ${badgeSetor(s)}
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+          <div>
+            <div class="setor-card-stat">${faltasS}</div>
+            <div style="font-size:12px;color:var(--muted)">faltas · ${mots.length} motoristas</div>
+          </div>
+          <div style="text-align:right;font-size:12px;color:var(--muted)">
+            Absenteísmo<br>
+            <strong style="font-size:18px;font-family:'Bebas Neue',sans-serif;color:${color === 'red' ? 'var(--danger)' : color === 'green' ? 'var(--success)' : 'var(--kavak)'}">${pct}%</strong>
+          </div>
+        </div>
+        <div class="progress-wrap" style="margin-top:10px;">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill ${color}" style="width:${Math.min(pct*3,100)}%"></div>
+          </div>
+        </div>
+      </div>`;
+  });
+  document.getElementById('dash-setor-cards').innerHTML = setorHtml;
+
+  // Tabela ocorrências recentes
+  const recentes = [...ocMes].sort((a,b) => b.data.localeCompare(a.data)).slice(0, 10);
+  const tbody = document.getElementById('dash-ocorrencias-tbody');
+  if (recentes.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">Nenhuma ocorrência lançada neste mês.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = recentes.map(o => {
+    const m = motoristas.find(x => x.id === o.motoristaId);
+    return `<tr>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;">${formatDate(o.data)}</td>
+      <td style="font-weight:500;">${m ? m.nome : '—'}</td>
+      <td>${m ? badgeSetor(m.setor) : '—'}</td>
+      <td>${badgeTipo(o.tipo)}</td>
+      <td style="font-size:12px;color:var(--muted);">${o.obs || '—'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deletarOcorrencia(${o.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// OCORRÊNCIAS
+// ═══════════════════════════════════════════════════════
+
+function renderOcorrencias() {
+  const filtroSetor = document.getElementById('oc-filtro-setor')?.value || '';
+  const filtroTipo = document.getElementById('oc-filtro-tipo')?.value || '';
+  let lista = getOcMes().sort((a,b) => b.data.localeCompare(a.data));
+
+  if (filtroSetor) lista = lista.filter(o => {
+    const m = motoristas.find(x => x.id === o.motoristaId);
+    return m && m.setor === filtroSetor;
+  });
+  if (filtroTipo) lista = lista.filter(o => o.tipo === filtroTipo);
+
+  const tbody = document.getElementById('oc-tbody');
+  if (lista.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted);">Nenhuma ocorrência encontrada.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = lista.map(o => {
+    const m = motoristas.find(x => x.id === o.motoristaId);
+    const desc = o.tipo === 'falta' && m ? formatMoney(getDescontoDiario(m)) : '—';
+    return `<tr>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;">${formatDate(o.data)}</td>
+      <td style="font-weight:500;">${m ? m.nome : '—'}</td>
+      <td>${m ? badgeSetor(m.setor) : '—'}</td>
+      <td>${badgeTipo(o.tipo)}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--danger);font-size:12px;">${desc}</td>
+      <td style="font-size:12px;color:var(--muted);">${o.obs || '—'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deletarOcorrencia(${o.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// MOTORISTAS
+// ═══════════════════════════════════════════════════════
+
+function renderMotoristas() {
+  const setores = ['LOG EXTERNA - GUINCHO', 'LOG EXTERNA', 'FTP', 'HUB OPS'];
+  let html = '';
+  setores.forEach(s => {
+    const mots = motoristas.filter(m => m.setor === s);
+    if (mots.length === 0) return;
+    const faltasMes = getOcMes().filter(o => o.tipo === 'falta' && mots.find(m => m.id === o.motoristaId)).length;
+    html += `<div class="setor-section">
+      <div class="setor-title">
+        <h3>${s}</h3>
+        ${badgeSetor(s)}
+        <span style="font-size:12px;color:var(--muted);">${mots.length} motorista(s) · ${faltasMes} falta(s) no mês</span>
+      </div>
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>#</th><th>Nome</th><th>Tipo</th><th>Escala</th><th>Salário</th><th>Faltas Mês</th><th>Desconto</th><th></th></tr></thead>
+            <tbody>
+              ${mots.map(m => {
+                const faltasMot = getOcorMotoristasMes(m.id, ['falta']).length;
+                const desc = faltasMot * getDescontoDiario(m);
+                return `<tr>
+                  <td style="font-family:'DM Mono',monospace;color:var(--muted);font-size:11px;">${m.id}</td>
+                  <td style="font-weight:600;">${m.nome}</td>
+                  <td style="font-size:12px;">${m.tipo}</td>
+                  <td style="font-size:12px;font-family:'DM Mono',monospace;">${m.escala}</td>
+                  <td style="font-family:'DM Mono',monospace;font-size:12px;">${formatMoney(m.salario)}</td>
+                  <td style="text-align:center;">${faltasMot > 0 ? `<span style="color:var(--danger);font-weight:700;">${faltasMot}</span>` : '<span style="color:var(--muted);">0</span>'}</td>
+                  <td style="font-family:'DM Mono',monospace;font-size:12px;color:${desc > 0 ? 'var(--danger)' : 'var(--muted)'};">${desc > 0 ? '-' + formatMoney(desc) : '—'}</td>
+                  <td>
+                    <button class="btn btn-outline btn-sm" onclick="editMotorista(${m.id})">Editar</button>
+                    <button class="btn btn-danger btn-sm" onclick="deletarMotorista(${m.id})" style="margin-left:4px;">✕</button>
+                  </td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('motoristas-setores').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+// FINANCEIRO
+// ═══════════════════════════════════════════════════════
+
+function renderFinanceiro() {
+  const ocMes = getOcMes();
+  const freMes = getFreMes();
+  const frAdd = freMes.filter(f => f.tipo === 'adicional');
+  const custoFr = frAdd.reduce((s,f) => s + (f.custo||0), 0);
+
+  let descontoFaltas = 0;
+  motoristas.forEach(m => {
+    const faltasMot = getOcorMotoristasMes(m.id, ['falta']).length;
+    descontoFaltas += faltasMot * getDescontoDiario(m);
+  });
+
+  const totalPagar = CONTRATO_TOTAL - descontoFaltas + custoFr;
+
+  document.getElementById('fin-cards').innerHTML = `
+    <div class="card">
+      <div class="card-label">Contrato Base SEG4</div>
+      <div class="card-value">${formatMoney(CONTRATO_TOTAL)}</div>
+      <div class="card-sub">Valor fixo mensal</div>
+    </div>
+    <div class="card">
+      <div class="card-label">(-) Descontos por Falta</div>
+      <div class="card-value red">-${formatMoney(descontoFaltas)}</div>
+      <div class="card-sub">${ocMes.filter(o=>o.tipo==='falta').length} falta(s) lançada(s)</div>
+    </div>
+    <div class="card">
+      <div class="card-label">(+) Freelancer Adicional</div>
+      <div class="card-value purple">+${formatMoney(custoFr)}</div>
+      <div class="card-sub">${frAdd.length} dia(s) adicional</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Total a Pagar SEG4</div>
+      <div class="card-value green">${formatMoney(totalPagar)}</div>
+      <div class="card-sub">Previsão para ${getMesLabel()}</div>
+    </div>
+  `;
+
+  // Por setor
+  const setores = ['LOG EXTERNA - GUINCHO', 'LOG EXTERNA', 'FTP', 'HUB OPS'];
+  document.getElementById('fin-setor-tbody').innerHTML = setores.map(s => {
+    const mots = motoristas.filter(m => m.setor === s);
+    const custoBase = mots.reduce((sum,m) => sum + m.salario, 0);
+    let descS = 0;
+    mots.forEach(m => {
+      const faltasMot = getOcorMotoristasMes(m.id, ['falta']).length;
+      descS += faltasMot * getDescontoDiario(m);
+    });
+    return `<tr>
+      <td>${badgeSetor(s)}</td>
+      <td style="text-align:center;">${mots.length}</td>
+      <td style="text-align:center;color:var(--danger);font-weight:600;">${ocMes.filter(o=>o.tipo==='falta'&&mots.find(m=>m.id===o.motoristaId)).length}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--danger);">-${formatMoney(descS)}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;font-weight:700;">${formatMoney(custoBase - descS)}</td>
+    </tr>`;
+  }).join('');
+
+  // Composição
+  document.getElementById('fin-composicao').innerHTML = `
+    <div class="fin-row">
+      <span>Contrato base</span>
+      <span class="fin-val">${formatMoney(CONTRATO_TOTAL)}</span>
+    </div>
+    <div class="fin-row">
+      <span>Desconto por faltas (${ocMes.filter(o=>o.tipo==='falta').length} dias)</span>
+      <span class="fin-val neg">- ${formatMoney(descontoFaltas)}</span>
+    </div>
+    <div class="fin-row">
+      <span>Freelancer adicional (${frAdd.length} dias × R$ 273,13)</span>
+      <span class="fin-val add">+ ${formatMoney(custoFr)}</span>
+    </div>
+    <div class="fin-row total">
+      <span>Total a pagar SEG4</span>
+      <span class="fin-val">${formatMoney(totalPagar)}</span>
+    </div>
+  `;
+
+  // Detalhe por motorista
+  document.getElementById('fin-detalhe-tbody').innerHTML = motoristas.map(m => {
+    const faltasMot = getOcorMotoristasMes(m.id, ['falta']).length;
+    const desc = faltasMot * getDescontoDiario(m);
+    const frMot = getFreMes().filter(f => f.setor === m.setor && f.tipo === 'adicional');
+    const custFrMot = 0; // freelancer é por setor, não por motorista
+    const total = m.salario - desc;
+    return `<tr>
+      <td style="font-weight:600;font-size:12px;">${m.nome}</td>
+      <td>${badgeSetor(m.setor)}</td>
+      <td style="font-size:12px;">${m.tipo}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;">${formatMoney(m.salario)}</td>
+      <td style="text-align:center;color:${faltasMot>0?'var(--danger)':'var(--muted)'};">${faltasMot}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--danger);">${desc>0?'-'+formatMoney(desc):'—'}</td>
+      <td style="font-size:12px;color:var(--muted);">—</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;font-weight:700;">${formatMoney(total)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// FREELANCERS
+// ═══════════════════════════════════════════════════════
+
+function renderFreelancers() {
+  const freMes = getFreMes();
+  const frAdd = freMes.filter(f => f.tipo === 'adicional');
+  const frCob = freMes.filter(f => f.tipo === 'cobertura');
+  const custoFr = frAdd.reduce((s,f) => s + (f.custo||0), 0);
+
+  document.getElementById('free-cards').innerHTML = `
+    <div class="card">
+      <div class="card-label">Total Registros</div>
+      <div class="card-value">${freMes.length}</div>
+      <div class="card-sub">No mês atual</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Cobertura de Falta</div>
+      <div class="card-value green">${frCob.length}</div>
+      <div class="card-sub">Sem custo adicional</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Motorista Adicional</div>
+      <div class="card-value purple">${frAdd.length}</div>
+      <div class="card-sub">R$ 273,13/dia</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Custo Total Freelancer</div>
+      <div class="card-value orange">${formatMoney(custoFr)}</div>
+      <div class="card-sub">Soma dos adicionais</div>
+    </div>
+  `;
+
+  const tbody = document.getElementById('free-tbody');
+  if (freMes.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted);">Nenhum freelancer registrado neste mês.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = freMes.sort((a,b) => b.data.localeCompare(a.data)).map(f => `
+    <tr>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;">${formatDate(f.data)}</td>
+      <td style="font-weight:500;">${f.nome}</td>
+      <td>${badgeSetor(f.setor)}</td>
+      <td>${f.tipo === 'adicional' ? '<span class="badge badge-freelancer">Adicional</span>' : '<span class="badge badge-folga">Cobertura</span>'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:${f.custo>0?'var(--guincho)':'var(--muted)'};">${f.custo > 0 ? formatMoney(f.custo) : 'Sem custo'}</td>
+      <td style="font-size:12px;color:var(--muted);">${f.obs || '—'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deletarFreelancer(${f.id})">✕</button></td>
+    </tr>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════════════════
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// Fecha ao clicar fora
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+});
+
+function populateMotoristaSelect() {
+  const sel = document.getElementById('oc-motorista');
+  sel.innerHTML = motoristas.sort((a,b) => a.nome.localeCompare(b.nome))
+    .map(m => `<option value="${m.id}">${m.nome} (${m.setor})</option>`).join('');
+}
+
+function openModalOcorrencia() {
+  document.getElementById('oc-data').value = toDateInput(new Date());
+  populateMotoristaSelect();
+  openModal('modal-ocorrencia');
+}
+
+let editMotId = null;
+
+function openModalMotorista() {
+  editMotId = null;
+  document.getElementById('modal-motorista-title').textContent = 'Adicionar Motorista';
+  document.getElementById('mot-nome').value = '';
+  document.getElementById('mot-tipo').value = 'Driver Interno';
+  document.getElementById('mot-setor').value = 'LOG EXTERNA';
+  document.getElementById('mot-escala').value = 'seg-sex';
+  updateSalario();
+  openModal('modal-motorista');
+}
+
+function editMotorista(id) {
+  const m = motoristas.find(x => x.id === id);
+  if (!m) return;
+  editMotId = id;
+  document.getElementById('modal-motorista-title').textContent = 'Editar Motorista';
+  document.getElementById('mot-nome').value = m.nome;
+  document.getElementById('mot-tipo').value = m.tipo;
+  document.getElementById('mot-setor').value = m.setor;
+  document.getElementById('mot-escala').value = m.escala;
+  document.getElementById('mot-salario').value = m.salario;
+  openModal('modal-motorista');
+}
+
+function updateSalario() {
+  const tipo = document.getElementById('mot-tipo').value;
+  document.getElementById('mot-salario').value = SALARIOS[tipo] || 0;
+}
+
+function openModalFreelancer() {
+  document.getElementById('fr-data').value = toDateInput(new Date());
+  document.getElementById('fr-nome').value = '';
+  document.getElementById('fr-custo').value = 0;
+  openModal('modal-freelancer');
+}
+
+function updateFreelancerCusto() {
+  const tipo = document.getElementById('fr-tipo').value;
+  document.getElementById('fr-custo').value = tipo === 'adicional' ? VALOR_FREELANCER_ADICIONAL : 0;
+}
+
+// ═══════════════════════════════════════════════════════
+// CRUD
+// ═══════════════════════════════════════════════════════
+
+let nextOcId = 1;
+let nextFrId = 1;
+
+function salvarOcorrencia() {
+  const data = document.getElementById('oc-data').value;
+  const motId = parseInt(document.getElementById('oc-motorista').value);
+  const tipo = document.getElementById('oc-tipo').value;
+  const obs = document.getElementById('oc-obs').value.trim();
+
+  if (!data || !motId) { alert('Preencha data e motorista.'); return; }
+
+  ocorrencias.push({ id: nextOcId++, data, motoristaId: motId, tipo, obs });
+  save();
+  closeModal('modal-ocorrencia');
+  document.getElementById('oc-obs').value = '';
+  renderAll();
+}
+
+function deletarOcorrencia(id) {
+  if (!confirm('Remover esta ocorrência?')) return;
+  ocorrencias = ocorrencias.filter(o => o.id !== id);
+  save();
+  renderAll();
+}
+
+function salvarMotorista() {
+  const nome = document.getElementById('mot-nome').value.trim();
+  const tipo = document.getElementById('mot-tipo').value;
+  const setor = document.getElementById('mot-setor').value;
+  const escala = document.getElementById('mot-escala').value;
+  const salario = parseFloat(document.getElementById('mot-salario').value);
+
+  if (!nome) { alert('Informe o nome do motorista.'); return; }
+
+  if (editMotId) {
+    const idx = motoristas.findIndex(m => m.id === editMotId);
+    motoristas[idx] = { id: editMotId, nome, tipo, setor, escala, salario };
+  } else {
+    motoristas.push({ id: nextMotId++, nome, tipo, setor, escala, salario });
+  }
+
+  save();
+  closeModal('modal-motorista');
+  renderAll();
+}
+
+function deletarMotorista(id) {
+  if (!confirm('Remover este motorista?')) return;
+  motoristas = motoristas.filter(m => m.id !== id);
+  save();
+  renderAll();
+}
+
+function salvarFreelancer() {
+  const data = document.getElementById('fr-data').value;
+  const nome = document.getElementById('fr-nome').value.trim();
+  const setor = document.getElementById('fr-setor').value;
+  const tipo = document.getElementById('fr-tipo').value;
+  const custo = parseFloat(document.getElementById('fr-custo').value) || 0;
+  const obs = document.getElementById('fr-obs').value.trim();
+
+  if (!data || !nome) { alert('Preencha data e nome.'); return; }
+
+  freelancers.push({ id: nextFrId++, data, nome, setor, tipo, custo, obs });
+  save();
+  closeModal('modal-freelancer');
+  renderFreelancers();
+  renderDashboard();
+  renderFinanceiro();
+}
+
+function deletarFreelancer(id) {
+  if (!confirm('Remover este freelancer?')) return;
+  freelancers = freelancers.filter(f => f.id !== id);
+  save();
+  renderFreelancers();
+  renderDashboard();
+  renderFinanceiro();
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORTAR RESUMO
+// ═══════════════════════════════════════════════════════
+
+function exportarResumo() {
+  const ocMes = getOcMes();
+  const freMes = getFreMes();
+  const frAdd = freMes.filter(f => f.tipo === 'adicional');
+  const custoFr = frAdd.reduce((s,f) => s + (f.custo||0), 0);
+  let descontoFaltas = 0;
+  motoristas.forEach(m => {
+    const faltasMot = getOcorMotoristasMes(m.id, ['falta']).length;
+    descontoFaltas += faltasMot * getDescontoDiario(m);
+  });
+  const totalPagar = CONTRATO_TOTAL - descontoFaltas + custoFr;
+
+  let csv = `RESUMO FINANCEIRO SEG4 - ${getMesLabel()}\n\n`;
+  csv += `Contrato Base;${formatMoney(CONTRATO_TOTAL)}\n`;
+  csv += `Desconto Faltas;-${formatMoney(descontoFaltas)}\n`;
+  csv += `Freelancer Adicional;+${formatMoney(custoFr)}\n`;
+  csv += `TOTAL A PAGAR;${formatMoney(totalPagar)}\n\n`;
+  csv += `OCORRÊNCIAS DO MÊS\n`;
+  csv += `Data;Motorista;Setor;Tipo;Desconto;Obs\n`;
+  ocMes.forEach(o => {
+    const m = motoristas.find(x => x.id === o.motoristaId);
+    const desc = o.tipo === 'falta' && m ? getDescontoDiario(m).toFixed(2) : '0';
+    csv += `${formatDate(o.data)};${m?m.nome:'?'};${m?m.setor:'?'};${o.tipo};${desc};${o.obs||''}\n`;
+  });
+
+  const blob = new Blob(['\uFEFF'+csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `SEG4_Resumo_${mesAtual}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════════════════════
+// START
+// ═══════════════════════════════════════════════════════
+// =====================================================
+// VIEW LIDER
+// =====================================================
+
+function initLider() {
+  const saved = localStorage.getItem('kavak_seg4');
+  if (saved) {
+    const d = JSON.parse(saved);
+    if (d.motoristas) motoristas = d.motoristas;
+    if (d.ocorrencias) ocorrencias = d.ocorrencias;
+    if (d.freelancers) freelancers = d.freelancers;
+    if (d.nextMotId) nextMotId = d.nextMotId;
+  }
+  const sel = document.getElementById('lider-mes');
+  const now = new Date();
+  for (let i = -1; i <= 2; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    const val = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+    const label = d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    const opt = document.createElement('option');
+    opt.value = val;
+    opt.textContent = label.charAt(0).toUpperCase() + label.slice(1);
+    if (i === 0) { opt.selected = true; mesAtual = val; }
+    sel.appendChild(opt);
+  }
+  document.getElementById('lider-oc-data').value = toDateInput(new Date());
+  document.getElementById('lider-fr-data').value = toDateInput(new Date());
+  populateLiderSelect();
+  renderLiderHist();
+}
+
+function populateLiderSelect() {
+  document.getElementById('lider-motorista').innerHTML = motoristas
+    .sort((a,b) => a.nome.localeCompare(b.nome))
+    .map(m => '<option value="' + m.id + '">' + m.nome + ' — ' + m.setor + '</option>').join('');
+}
+
+function renderLiderHist() {
+  mesAtual = document.getElementById('lider-mes').value;
+  const ocMes = getOcMes().sort((a,b) => b.data.localeCompare(a.data));
+  const frMes = getFreMes().sort((a,b) => b.data.localeCompare(a.data));
+  document.getElementById('ls-faltas').textContent  = ocMes.filter(o=>o.tipo==='falta').length;
+  document.getElementById('ls-folgas').textContent  = ocMes.filter(o=>o.tipo==='folga').length;
+  document.getElementById('ls-atestados').textContent = ocMes.filter(o=>o.tipo==='atestado').length;
+  document.getElementById('ls-freelancers').textContent = frMes.length;
+
+  const tbody = document.getElementById('lh-oc-tbody');
+  tbody.innerHTML = ocMes.length === 0
+    ? '<tr><td colspan="5" style="text-align:center;padding:24px;color:#555;">Nenhum lancamento este mes.</td></tr>'
+    : ocMes.map(o => {
+        const m = motoristas.find(x => x.id === o.motoristaId);
+        return '<tr style="border-bottom:1px solid #1e1e2e;">'
+          + '<td style="padding:9px 12px;font-family:monospace;font-size:11px;color:#888;">' + formatDate(o.data) + '</td>'
+          + '<td style="padding:9px 12px;font-weight:600;font-size:12px;color:#e8e8f0;">' + (m ? m.nome : '?') + '</td>'
+          + '<td style="padding:9px 12px;">' + badgeSetor(m ? m.setor : '') + '</td>'
+          + '<td style="padding:9px 12px;">' + badgeTipo(o.tipo) + '</td>'
+          + '<td style="padding:9px 12px;"><button onclick="liderDelOc(' + o.id + ')" style="background:#2a1010;color:#c0392b;border:1px solid #4a2020;border-radius:5px;padding:3px 9px;cursor:pointer;font-size:11px;">x</button></td>'
+          + '</tr>';
+      }).join('');
+
+  const ftbody = document.getElementById('lh-fr-tbody');
+  ftbody.innerHTML = frMes.length === 0
+    ? '<tr><td colspan="4" style="text-align:center;padding:24px;color:#555;">Nenhum freelancer este mes.</td></tr>'
+    : frMes.map(f => '<tr style="border-bottom:1px solid #1e1e2e;">'
+        + '<td style="padding:9px 12px;font-family:monospace;font-size:11px;color:#888;">' + formatDate(f.data) + '</td>'
+        + '<td style="padding:9px 12px;font-weight:600;font-size:12px;color:#e8e8f0;">' + f.nome + ' — ' + f.setor + '</td>'
+        + '<td style="padding:9px 12px;"><span style="background:#1e0a28;color:#a070d0;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600;">' + (f.tipo === 'adicional' ? 'Adicional' : 'Cobertura') + '</span></td>'
+        + '<td style="padding:9px 12px;"><button onclick="liderDelFr(' + f.id + ')" style="background:#2a1010;color:#c0392b;border:1px solid #4a2020;border-radius:5px;padding:3px 9px;cursor:pointer;font-size:11px;">x</button></td>'
+        + '</tr>').join('');
+}
+
+function liderSalvarOc() {
+  const data = document.getElementById('lider-oc-data').value;
+  const motId = parseInt(document.getElementById('lider-motorista').value);
+  const tipo = document.getElementById('lider-oc-tipo').value;
+  const obs = document.getElementById('lider-oc-obs').value.trim();
+  if (!data || !motId) { alert('Preencha data e motorista.'); return; }
+  ocorrencias.push({ id: nextOcId++, data, motoristaId: motId, tipo, obs });
+  save();
+  renderLiderHist();
+  document.getElementById('lider-oc-obs').value = '';
+  liderFeedback('Ocorrencia lancada com sucesso!', true);
+}
+
+function liderSalvarFr() {
+  const data = document.getElementById('lider-fr-data').value;
+  const nome = document.getElementById('lider-fr-nome').value.trim();
+  const setor = document.getElementById('lider-fr-setor').value;
+  const tipo = document.getElementById('lider-fr-tipo').value;
+  const custo = tipo === 'adicional' ? VALOR_FREELANCER_ADICIONAL : 0;
+  const obs = document.getElementById('lider-fr-obs').value.trim();
+  if (!data || !nome) { alert('Preencha data e nome.'); return; }
+  freelancers.push({ id: nextFrId++, data, nome, setor, tipo, custo, obs });
+  save();
+  renderLiderHist();
+  document.getElementById('lider-fr-nome').value = '';
+  liderFeedback('Freelancer registrado!', true);
+}
+
+function liderDelOc(id) {
+  if (!confirm('Remover este lancamento?')) return;
+  ocorrencias = ocorrencias.filter(o => o.id !== id);
+  save(); renderLiderHist();
+}
+
+function liderDelFr(id) {
+  if (!confirm('Remover este freelancer?')) return;
+  freelancers = freelancers.filter(f => f.id !== id);
+  save(); renderLiderHist();
+}
+
+function liderFeedback(msg, ok) {
+  const el = document.getElementById('l-feedback');
+  el.textContent = (ok ? '+ ' : '! ') + msg;
+  el.style.display = 'block';
+  el.style.background = ok ? '#0a2a18' : '#2a0a0a';
+  el.style.color = ok ? '#00e5a0' : '#ff4d6d';
+  el.style.border = '1px solid ' + (ok ? '#00e5a0' : '#ff4d6d');
+  setTimeout(() => el.style.display = 'none', 3000);
+}
+
+function lToggle(id) {
+  const el = document.getElementById(id);
+  el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+}
+
+// START
+const isLider = new URLSearchParams(window.location.search).get('view') === 'lider';
+if (isLider) {
+  document.querySelector('.app').style.display = 'none';
+  document.getElementById('lider-view').style.display = 'block';
+  document.title = 'SEG4 Lancamentos — Lider';
+  initLider();
+} else {
+  init();
+}
+</script>
+
+<!-- LIDER VIEW -->
+<div id="lider-view" style="display:none;min-height:100vh;background:#0a0a0f;font-family:'DM Sans',sans-serif;">
+
+  <div style="background:#13131a;border-bottom:3px solid #ff4d00;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;position:sticky;top:0;z-index:10;">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:#ff4d00;">KAVAK</span>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#fff;">Lancamentos SEG4</div>
+        <div style="font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1.5px;">Acesso Lider</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:12px;color:#555;">Mes:</span>
+      <select id="lider-mes" onchange="renderLiderHist()" style="background:#1e1e2e;border:1px solid #2a2a3a;color:#e8e8f0;border-radius:6px;padding:6px 10px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;"></select>
+    </div>
+  </div>
+
+  <div id="l-feedback" style="display:none;margin:16px 24px 0;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;font-family:'DM Mono',monospace;"></div>
+
+  <!-- Stats -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:20px 24px 0;">
+    <div style="background:#13131a;border:1px solid #1e1e2e;border-radius:10px;padding:14px 16px;">
+      <div style="font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;">Faltas</div>
+      <div id="ls-faltas" style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:#c0392b;line-height:1;">0</div>
+    </div>
+    <div style="background:#13131a;border:1px solid #1e1e2e;border-radius:10px;padding:14px 16px;">
+      <div style="font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;">Folgas</div>
+      <div id="ls-folgas" style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:#00e5a0;line-height:1;">0</div>
+    </div>
+    <div style="background:#13131a;border:1px solid #1e1e2e;border-radius:10px;padding:14px 16px;">
+      <div style="font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;">Atestados</div>
+      <div id="ls-atestados" style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:#ffd166;line-height:1;">0</div>
+    </div>
+    <div style="background:#13131a;border:1px solid #1e1e2e;border-radius:10px;padding:14px 16px;">
+      <div style="font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;">Freelancers</div>
+      <div id="ls-freelancers" style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:#a070d0;line-height:1;">0</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:360px 1fr;gap:20px;padding:20px 24px;">
+
+    <!-- Formularios -->
+    <div style="display:flex;flex-direction:column;gap:14px;">
+
+      <!-- Form Ocorrencia -->
+      <div style="background:#13131a;border:1px solid #1e1e2e;border-radius:12px;overflow:hidden;">
+        <div onclick="lToggle('lf-oc')" style="padding:14px 18px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:7px;height:7px;background:#ff4d00;border-radius:50%;"></div>
+            <span style="color:#e8e8f0;font-size:14px;font-weight:700;">Lancar Ocorrencia</span>
+          </div>
+          <span style="color:#555;font-size:20px;line-height:1;">+</span>
+        </div>
+        <div id="lf-oc" style="padding:16px 18px;display:flex;flex-direction:column;gap:12px;border-top:1px solid #1e1e2e;">
+          <div>
+            <label style="font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:5px;">Data</label>
+            <input type="date" id="lider-oc-data" style="width:100%;background:#0a0a0f;border:1.5px solid #1e1e2e;color:#e8e8f0;border-radius:7px;padding:9px 11px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;">
+          </div>
+          <div>
+            <label style="font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:5px;">Motorista</label>
+            <select id="lider-motorista" style="width:100%;background:#0a0a0f;border:1.5px solid #1e1e2e;color:#e8e8f0;border-radius:7px;padding:9px 11px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;"></select>
+          </div>
+          <div>
+            <label style="font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:5px;">Tipo</label>
+            <select id="lider-oc-tipo" style="width:100%;background:#0a0a0f;border:1.5px solid #1e1e2e;color:#e8e8f0;border-radius:7px;padding:9px 11px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;">
+              <option value="falta">Falta</option>
+              <option value="folga">Folga</option>
+              <option value="atestado">Atestado</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:5px;">Observacao</label>
+            <input type="text" id="lider-oc-obs" placeholder="Justificativa, obs..." style="width:100%;background:#0a0a0f;border:1.5px solid #1e1e2e;color:#e8e8f0;border-radius:7px;padding:9px 11px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;">
+          </div>
+          <button onclick="liderSalvarOc()" style="width:100%;background:#ff4d00;color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Salvar Ocorrencia</button>
+        </div>
+      </div>
+
+      <!-- Form Freelancer -->
+      <div style="background:#13131a;border:1px solid #1e1e2e;border-radius:12px;overflow:hidden;">
+        <div onclick="lToggle('lf-fr')" style="padding:14px 18px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:7px;height:7px;background:#a070d0;border-radius:50%;"></div>
+            <span style="color:#e8e8f0;font-size:14px;font-weight:700;">Registrar Freelancer</span>
+          </div>
+          <span style="color:#555;font-size:20px;line-height:1;">+</span>
+        </div>
+        <div id="lf-fr" style="display:none;padding:16px 18px;flex-direction:column;gap:12px;border-top:1px solid #1e1e2e;">
+          <div style="background:#0d0a14;border:1px solid #2a1a3a;border-radius:6px;padding:10px 12px;font-size:12px;color:#a070d0;">
+            Cobertura de falta = sem custo · Adicional = R$ 273,13/dia
+          </div>
+          <div>
+            <label style="font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:5px;">Data</label>
+            <input type="date" id="lider-fr-data" style="width:100%;background:#0a0a0f;border:1.5px solid #1e1e2e;color:#e8e8f0;border-radius:7px;padding:9px 11px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;">
+          </div>
+          <div>
+            <label style="font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:5px;">Nome</label>
+            <input type="text" id="lider-fr-nome" placeholder="Nome do freelancer" style="width:100%;background:#0a0a0f;border:1.5px solid #1e1e2e;color:#e8e8f0;border-radius:7px;padding:9px 11px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;">
+          </div>
+          <div>
+            <label style="font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:5px;">Setor</label>
+            <select id="lider-fr-setor" style="width:100%;background:#0a0a0f;border:1.5px solid #1e1e2e;color:#e8e8f0;border-radius:7px;padding:9px 11px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;">
+              <option>LOG EXTERNA</option>
+              <option>LOG EXTERNA - GUINCHO</option>
+              <option>FTP</option>
+              <option>HUB OPS</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:5px;">Tipo</label>
+            <select id="lider-fr-tipo" style="width:100%;background:#0a0a0f;border:1.5px solid #1e1e2e;color:#e8e8f0;border-radius:7px;padding:9px 11px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;">
+              <option value="cobertura">Cobertura de Falta (sem custo)</option>
+              <option value="adicional">Motorista Adicional (R$ 273,13)</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1.5px;display:block;margin-bottom:5px;">Observacao</label>
+            <input type="text" id="lider-fr-obs" placeholder="Motivo..." style="width:100%;background:#0a0a0f;border:1.5px solid #1e1e2e;color:#e8e8f0;border-radius:7px;padding:9px 11px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;">
+          </div>
+          <button onclick="liderSalvarFr()" style="width:100%;background:#5c2d91;color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">Salvar Freelancer</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Historico -->
+    <div style="display:flex;flex-direction:column;gap:14px;">
+
+      <div style="background:#13131a;border:1px solid #1e1e2e;border-radius:12px;overflow:hidden;">
+        <div style="padding:13px 18px;border-bottom:1px solid #1e1e2e;">
+          <span style="color:#e8e8f0;font-size:14px;font-weight:700;">Ocorrencias do Mes</span>
+        </div>
+        <div style="overflow:auto;max-height:360px;">
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr style="background:#0a0a0f;">
+              <th style="padding:8px 12px;text-align:left;font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1px;">Data</th>
+              <th style="padding:8px 12px;text-align:left;font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1px;">Motorista</th>
+              <th style="padding:8px 12px;text-align:left;font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1px;">Setor</th>
+              <th style="padding:8px 12px;text-align:left;font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1px;">Tipo</th>
+              <th style="padding:8px 12px;"></th>
+            </tr></thead>
+            <tbody id="lh-oc-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="background:#13131a;border:1px solid #1e1e2e;border-radius:12px;overflow:hidden;">
+        <div style="padding:13px 18px;border-bottom:1px solid #1e1e2e;">
+          <span style="color:#e8e8f0;font-size:14px;font-weight:700;">Freelancers do Mes</span>
+        </div>
+        <div style="overflow:auto;max-height:240px;">
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr style="background:#0a0a0f;">
+              <th style="padding:8px 12px;text-align:left;font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1px;">Data</th>
+              <th style="padding:8px 12px;text-align:left;font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1px;">Nome / Setor</th>
+              <th style="padding:8px 12px;text-align:left;font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1px;">Tipo</th>
+              <th style="padding:8px 12px;"></th>
+            </tr></thead>
+            <tbody id="lh-fr-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:14px;font-size:11px;color:#333;border-top:1px solid #13131a;">
+    Kavak · Controle SEG4 · Acesso Lider de Operacoes
+  </div>
+</div>
+
+</body>
+</html>
